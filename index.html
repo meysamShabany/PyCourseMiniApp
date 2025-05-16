@@ -295,6 +295,9 @@
             padding: 1.2rem;
             border-radius: 12px;
             line-height: 1.8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .back-btn {
@@ -385,8 +388,8 @@
                 <!-- <img src="https://example.com/pycourse/django.jpg" alt="Django" class="detail-image"> -->
             </div>
             <div class="detail-content">
-                <p>در این دوره یاد می‌گیرید:</p>
-                <ul>
+                <p>در این دوره یاد می‌گیرید</p>
+                <ul style="text-align: center!important;list-style: none;">
                     <li>پیاده‌سازی سیستم احراز هویت دو مرحله‌ای</li>
                     <li>بهینه‌سازی Queryها با Django ORM</li>
                     <li>ایجاد APIهای REST با Django REST Framework</li>
@@ -538,7 +541,7 @@
             پروفایل
         </div>
     </div>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- <script src="https://telegram.org/js/telegram-web-app.js"></script> -->
     <script>
         function showPage(page) {
             const navItems = document.querySelectorAll('.nav-item');
