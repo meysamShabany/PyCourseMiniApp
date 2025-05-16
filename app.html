@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyCourse MiniApp</title>
+    <style>
+        @font-face {
+            font-family: "Vazir";
+            src: url(fonts/Vazir.eot);
+            src: url(fonts/Vazir.ttf);
+            src: url(fonts/Vazir.woff);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Vazir", sans-serif;
+        }
+
+        :root {
+            --primary: #64ffda;
+            --secondary: #0a192f;
+            --dark-bg: #020c1b;
+            --card-bg: rgba(23, 42, 69, 0.8);
+            --text-main: #ccd6f6;
+            --text-accent: #e6f1ff;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--dark-bg) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-top: 70px;
+            padding-bottom: 70px;
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem;
+            background: rgba(10, 25, 47, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--primary);
+            box-shadow: 0 2px 20px rgba(100, 255, 218, 0.3);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .app-header {
+            transform: translateY(0) !important;
+            transition: transform 0.4s !important;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary), #00b4d8) !important;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 12px rgba(100, 255, 218, 0.5);
+            letter-spacing: 1px;
+        }
+
+        /* محتوای اصلی با اسکرول */
+        .main-content {
+            padding: 1rem;
+            height: calc(100vh - 140px);
+            /* محاسبه ارتفاع با احتساب هدر و ناوبری */
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+
+        /* استایل اسکرولبار */
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+
+        /* کارت‌های دوره با افکت ویژه */
+        .course-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 1.3rem;
+            margin-bottom: 1.3rem;
+            transition: all 0.4s ease-out;
+            border: 1px solid rgba(100, 255, 218, 0.4);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(100, 255, 218, 0.2);
+            border-color: var(--primary);
+        }
+
+        .course-card:hover::after {
+            opacity: 1;
+        }
+
+        .course-title {
+            color: var(--primary);
+            margin-bottom: 0.7rem;
+            font-size: 1.15rem;
+            position: relative;
+        }
+
+        .course-desc {
+            color: var(--text-main);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        /* ناوبری ثابت پایین */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            background: rgba(10, 25, 47, 0.97);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 0;
+            border-top: 1px solid rgba(100, 255, 218, 0.3);
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active::before {
+            width: 50%;
+        }
+
+        .detail-page {
+            display: none;
+            padding: 1rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(100, 255, 218, 0.5);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(100, 255, 218, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(100, 255, 218, 0);
+            }
+        }
+
+        #profile-page {
+            display: none;
+            text-align: center;
+            padding-top: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            object-fit: cover;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+        }
+
+        .profile-username {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-score {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            display: inline-block;
+            border: 1px solid var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .course-card {
+            animation: cardEntrance 0.6s ease-out;
+            animation-fill-mode: backwards;
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .rating {
+            color: gold;
+            font-size: 25px;
+        }
+
+        .detail-page {
+            display: none;
+            padding: 5rem 1rem 4rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .detail-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-title {
+            color: var(--primary);
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-image {
+            width: 100%;
+            border-radius: 12px;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(100, 255, 218, 0.3);
+        }
+
+        .detail-content {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 12px;
+            line-height: 1.8;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(100, 255, 218, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(100, 255, 218, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(100, 255, 218, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(100, 255, 218, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(100, 255, 218, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="logo">PyCourse</div>
+    </header>
+
+    <div class="main-content">
+        <div id="main-page">
+            <div class="course-card" onclick="showDetailPage('django')">
+                <h3 class="course-title">دوره جنگو پیشرفته</h3>
+                <p class="course-desc">ساخت وب‌اپلیکیشن‌های سازمانی با Django REST Framework</p>
+            </div>
+
+            <div class="course-card" onclick="showDetailPage('data-science')">
+                <h3 class="course-title">پایتون برای علم داده</h3>
+                <p class="course-desc">تحلیل داده با Pandas، NumPy و Matplotlib</p>
+            </div>
+
+            <div class="course-card" onclick="showDetailPage('websocket')">
+                <h3 class="course-title">WebSocket و تجربه Real-time</h3>
+                <p class="course-desc">پیاده‌سازی چت آنلاین و آپدیت لحظه‌ای با Django Channels</p>
+            </div>
+
+            <div class="course-card" onclick="showDetailPage('robots')">
+                <h3 class="course-title">ربات‌نویسی پیشرفته</h3>
+                <p class="course-desc">ساخت ربات‌های هوشمند با Python + AI</p>
+            </div>
+
+            <div class="course-card" onclick="showDetailPage('docker')">
+                <h3 class="course-title">Docker پادشاه مقیاس‌پذیری</h3>
+                <p class="course-desc">دپلوی حرفه‌ای با Docker و Kubernetes</p>
+            </div>
+
+            <div class="course-card" onclick="showDetailPage('user-agents')">
+                <h3 class="course-title">User Agents برای فردا</h3>
+                <p class="course-desc">شبیه‌سازی مرورگرها و کراولینگ پیشرفته</p>
+            </div>
+        </div>
+
+        <div id="django-page" class="detail-page">
+            <div class="detail-header">
+                <h2 class="detail-title">دوره جنگو پیشرفته</h2>
+                <!-- <img src="https://example.com/pycourse/django.jpg" alt="Django" class="detail-image"> -->
+            </div>
+            <div class="detail-content">
+                <p>در این دوره یاد می‌گیرید:</p>
+                <ul>
+                    <li>پیاده‌سازی سیستم احراز هویت دو مرحله‌ای</li>
+                    <li>بهینه‌سازی Queryها با Django ORM</li>
+                    <li>ایجاد APIهای REST با Django REST Framework</li>
+                    <li>پیاده‌سازی سیستم پرداخت آنلاین</li>
+                </ul>
+                <div class="rating">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">☆</span>
+                </div>
+                <button class="back-btn" onclick="backToMain()">بازگشت</button>
+            </div>
+        </div>
+
+        <div id="data-science-page" class="detail-page">
+            <div class="detail-header">
+                <h2 class="detail-title">پایتون برای علم داده</h2>
+                <!-- <img src="https://example.com/pycourse/datascience.jpg" alt="Data Science" class="detail-image"> -->
+            </div>
+            <div class="detail-content">
+                <p>سرفصل‌های اصلی:</p>
+                <ul>
+                    <li>تحلیل داده با Pandas (پروژه محور)</li>
+                    <li>پیاده‌سازی الگوریتم‌های ML با Scikit-learn</li>
+                    <li>تصویرسازی داده با Matplotlib و Seaborn</li>
+                    <li>کار با دیتابیس‌های بزرگ</li>
+                </ul>
+                <div class="rating">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <button class="back-btn" onclick="backToMain()">بازگشت</button>
+            </div>
+        </div>
+
+        <div id="websocket-page" class="detail-page">
+            <div class="detail-header">
+                <h2 class="detail-title">WebSocket و تجربه Real-time</h2>
+                <!-- <img src="https://example.com/pycourse/websocket.jpg" alt="WebSocket" class="detail-image"> -->
+            </div>
+            <div class="detail-content">
+                <p>در این دوره خواهید آموخت:</p>
+                <ul>
+                    <li>مفاهیم پایه WebSocket و تفاوت با HTTP</li>
+                    <li>پیاده‌سازی چت آنلاین با Django Channels</li>
+                    <li>سیستم نوتیفیکیشن لحظه‌ای</li>
+                    <li>بهینه‌سازی عملکرد برای هزاران کاربر همزمان</li>
+                </ul>
+                <div class="rating">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">☆</span>
+                    <span class="star">☆</span>
+                </div>
+                <button class="back-btn" onclick="backToMain()">بازگشت</button>
+            </div>
+        </div>
+
+        <div id="robots-page" class="detail-page">
+            <div class="detail-header">
+                <h2 class="detail-title">ربات‌نویسی پیشرفته</h2>
+                <!-- <img src="https://example.com/pycourse/robots.jpg" alt="Robots" class="detail-image"> -->
+            </div>
+            <div class="detail-content">
+                <p>سرفصل‌های کلیدی:</p>
+                <ul>
+                    <li>اتوماسیون مرورگر با Selenium</li>
+                    <li>ربات‌های هوشمند ترکیبی با NLP</li>
+                    <li>پیاده‌سازی RPA (اتوماسیون فرآیند رباتیک)</li>
+                    <li>دور زدن CAPTCHA به روش اخلاقی</li>
+                </ul>
+                <div class="rating">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <button class="back-btn" onclick="backToMain()">بازگشت</button>
+            </div>
+        </div>
+
+        <div id="docker-page" class="detail-page">
+            <div class="detail-header">
+                <h2 class="detail-title">Docker پادشاه مقیاس‌پذیری</h2>
+                <!-- <img src="https://example.com/pycourse/docker.jpg" alt="Docker" class="detail-image"> -->
+            </div>
+            <div class="detail-content">
+                <p>آنچه فرا خواهید گرفت:</p>
+                <ul>
+                    <li>Dockerize کردن پروژه‌های Django</li>
+                    <li>مدیریت کانتینرها با Docker Compose</li>
+                    <li>استقرار روی Kubernetes</li>
+                    <li>مقیاس‌پذیری خودکار (Auto-scaling)</li>
+                </ul>
+                <div class="rating">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <button class="back-btn" onclick="backToMain()">بازگشت</button>
+            </div>
+        </div>
+
+        <div id="user-agents-page" class="detail-page">
+            <div class="detail-header">
+                <h2 class="detail-title">User Agents برای فردا</h2>
+                <!-- <img src="https://example.com/pycourse/useragents.jpg" alt="User Agents" class="detail-image"> -->
+            </div>
+            <div class="detail-content">
+                <p>محتویات دوره:</p>
+                <ul>
+                    <li>شبیه‌سازی مرورگرهای مختلف</li>
+                    <li>مدیریت کوکی‌ها و sessionها</li>
+                    <li>دور زدن محدودیت‌های کراولینگ</li>
+                    <li>پیاده‌سازی سیستم‌های ضد تقلب</li>
+                </ul>
+                <div class="rating">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <button class="back-btn" onclick="backToMain()">بازگشت</button>
+            </div>
+        </div>
+        <div id="profile-page" style="display: none;">
+            <img id="user-avatar" class="profile-avatar" src="" alt="آواتار کاربر">
+            <h2 id="username" class="profile-username">یوزرنیم</h2>
+            <div class="profile-score">امتیازات: <span id="user-score">-۱</span></div>
+        </div>
+    </div>
+
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showPage('courses')">
+            دوره‌ها
+        </div>
+        <div class="nav-item" onclick="showPage('profile')">
+            پروفایل
+        </div>
+    </div>
+
+    <script>
+        function showPage(page) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (page === 'courses') {
+                document.getElementById('main-page').style.display = 'block';
+                document.getElementById('profile-page').style.display = 'none';
+            } else if (page === 'profile') {
+                document.getElementById('main-page').style.display = 'none';
+                document.getElementById('profile-page').style.display = 'block';
+                loadProfile();
+            }
+        }
+        function showDetailPage(courseId) {
+            document.getElementById('main-page').style.display = 'none';
+            document.getElementById(`${courseId}-page`).style.display = 'block';
+        }
+
+        function backToMain() {
+            document.querySelectorAll('.detail-page').forEach(page => {
+                page.style.display = 'none';
+            });
+            document.getElementById('main-page').style.display = 'block';
+        }
+
+
+        function loadProfile() {
+            if (window.Telegram && Telegram.WebApp) {
+                const user = Telegram.WebApp.initDataUnsafe.user;
+                if (user) {
+                    document.getElementById('username').textContent = user.username || 'کاربر';
+                    if (user.photo_url) {
+                        document.getElementById('user-avatar').src = user.photo_url;
+                    }
+                }
+            }
+        }
+
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.expand();
+            Telegram.WebApp.enableClosingConfirmation();
+            Telegram.WebApp.setHeaderColor('#0a192f');
+            Telegram.WebApp.setBackgroundColor('#0a192f');
+
+            loadProfile();
+        }
+    </script>
+</body>
+
+</html>
