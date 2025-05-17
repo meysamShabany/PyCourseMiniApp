@@ -525,10 +525,15 @@
                 <button class="back-btn" onclick="backToMain()">بازگشت</button>
             </div>
         </div>
+        <div id="mycoursees-page" style="display: none;">
+            <!-- <img id="user-avatar" class="profile-avatar" src="" alt="آواتار کاربر"> -->
+            <h2 id="username" class="profile-username">دوره ای یافت نشد!!</h2>
+            <!-- <div class="profile-score">امتیازات: <span id="user-score">1-</span></div> -->
+        </div>
         <div id="profile-page" style="display: none;">
-            <img id="user-avatar" class="profile-avatar" src="" alt="آواتار کاربر">
-            <h2 id="username" class="profile-username">یوزرنیم</h2>
-            <div class="profile-score">امتیازات: <span id="user-score">-۱</span></div>
+            <img id="user-avatar" class="profile-avatar" src="" alt="آواتار کاربر" style="display: none;">
+            <h2 id="username" class="profile-username">username</h2>
+            <div class="profile-score">امتیازات: <span id="user-score">1-</span></div>
         </div>
     </div>
 
@@ -536,6 +541,9 @@
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showPage('courses')">
             دوره‌ها
+        </div>
+        <div class="nav-item" onclick="showPage('mycoursees')">
+            دوره های من
         </div>
         <div class="nav-item" onclick="showPage('profile')">
             پروفایل
@@ -551,10 +559,16 @@
             if (page === 'courses') {
                 document.getElementById('main-page').style.display = 'block';
                 document.getElementById('profile-page').style.display = 'none';
+                document.getElementById('mycoursees-page').style.display = 'none';
             } else if (page === 'profile') {
-                document.getElementById('main-page').style.display = 'none';
-                document.getElementById('profile-page').style.display = 'block';
                 loadProfile();
+                document.getElementById('main-page').style.display = 'none';
+                document.getElementById('mycoursees-page').style.display = 'none';
+                document.getElementById('profile-page').style.display = 'block';
+            }else if (page === 'mycoursees'){
+                document.getElementById('main-page').style.display = 'none';
+                document.getElementById('profile-page').style.display = 'none';
+                document.getElementById('mycoursees-page').style.display = 'block';
             }
         }
         function showDetailPage(courseId) {
@@ -577,6 +591,7 @@
                     document.getElementById('username').textContent = user.username || 'کاربر';
                     if (user.photo_url) {
                         document.getElementById('user-avatar').src = user.photo_url;
+                        document.getElementById('user-avatar').style.display = 'block';
                     }
                 }
             }
