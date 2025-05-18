@@ -589,8 +589,8 @@
                 if (user) {
                     document.getElementById('username').textContent = user.username || 'کاربر';
                     if (user.photo_url) {
-                        document.getElementById('user-avatar').src = user.photo_url;
                         document.getElementById('user-avatar').style.display = 'block';
+                        document.getElementById('user-avatar').src = user.photo_url;
                     }
                 }
             }
